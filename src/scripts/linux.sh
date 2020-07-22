@@ -375,9 +375,13 @@ php_semver() {
 
 # Function to install packaged PHP
 add_packaged_php() {
-  update_lists
-  IFS=' ' read -r -a packages <<< "$(echo "cli curl mbstring xml intl" | sed "s/[^ ]*/php$version-&/g")"
-  $apt_install "${packages[@]}"
+  if [ "$runner" = "self-hosted" ] || [ "${use_package_cache:-true}" = "false" ]; then
+    update_lists
+    IFS=' ' read -r -a packages <<< "$(echo "cli curl mbstring xml intl" | sed "s/[^ ]*/php$version-&/g")"
+    $apt_install "${packages[@]}"
+  else
+    curl -sSL "$github"/php-ubuntu/releases/latest/download/install.sh | bash -s "$version"
+  fi
 }
 
 # Function to update PHP.
